@@ -1,0 +1,85 @@
+name: Deploy
+
+on: push
+
+jobs:
+    build:
+        runs-on: ${{matrix.os}}
+
+        strategy:
+          matrix:
+            os: [ubuntu-latest]
+            node: [18, 20]
+
+        services:
+          redis:
+            image: redis
+            ports:
+              - 6379:6379
+
+        steps:
+            - name: Install redis cli
+              run: sudo apt-get install -y && sudo apt-get install redis-tools -y
+
+            - name: Test redis
+              run: redis-cli -h localhost -p 6379 ping
+
+            - name: Print variable
+              run: echo "${{ secrets.TOKEN_SECRECT }}"
+
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: setup
+              uses: actions/setup-node@v4
+              with:
+                node-version: ${{ matrix.node }}
+
+            - name: Instalar dependencias
+              run: npm install
+
+            - name: Run test
+              run: npm run test
+
+            - name: Build page
+              run: npm run build
+
+               
+            - name: upload artifact
+              if: ${{matrix.os == 'ubuntu-latest' && matrix.node == 18}} 
+              uses: actions/upload-pages-artifact@v3
+              with:
+                path: public/
+    
+    deploy:
+      runs-on: ubuntu-latest
+      needs: build
+
+      permissions:
+        pages: write
+        id-token: write
+
+      environment:
+        name: github-pages${{ github.ref}}
+        url: ${{ steps.deployment-pages.outputs.page_url }}
+
+      steps:
+        - name: Deploy
+          id: deployment-pages
+          uses: actions/deploy-pages@v4
+    
+    notify:
+      runs-on: ubuntu-latest
+      needs: deploy
+      if: always()
+
+
+      #Crear app en Slack API y obtener el webhook URL para agregarlo a los secrets del repo como SLACK
+      steps:
+        - name: Notify to slack
+          uses: 8398a7/action-slack@v3
+          env:
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK }}
+          with:
+            status: ${{ job.status }}
+            fields: repo,commit,author,job,took
