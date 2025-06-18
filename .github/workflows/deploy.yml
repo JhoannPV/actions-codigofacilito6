@@ -60,7 +60,7 @@ jobs:
         id-token: write
 
       environment:
-        name: github-page${{ github.ref}}
+        name: github-pages${{ github.ref}}
         url: ${{ steps.deployment-pages.outputs.page_url }}
 
       steps:
