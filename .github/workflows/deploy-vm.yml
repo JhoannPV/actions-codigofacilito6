@@ -17,5 +17,3 @@ jobs:
 
       - name: Create File
         run: ssh -o StricktHostKeyChecking=no azureuser@48.217.49.228
-      - name: Enter passphrase for (stdin):azure
-        run: ssh-add -azure touch hello.txt
