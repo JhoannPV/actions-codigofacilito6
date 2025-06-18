@@ -16,4 +16,6 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
       - name: Create File
-        run: ssh -o StricktHostKeyChecking=no azureuser@48.217.49.228 azure touch hola.txt
+        run: ssh -o StricktHostKeyChecking=no azureuser@48.217.49.228
+      - name: Enter passphrase for (stdin):azure
+        run: ssh-add - Enter passphrase for (stdin):azure touch hello.txt
