@@ -18,6 +18,9 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      # - name: Create File
+      #   run: ssh -o StrictHostKeyChecking=no azureuser@48.217.49.228 touch hello.txt
       
       - name: Deploy to stage server
         if: ${{ github.ref == 'refs/heads/stage' }}
